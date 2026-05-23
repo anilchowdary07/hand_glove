@@ -1,0 +1,14 @@
+/Users/anilchowdary/Downloads/Smart_Grip-main/backend/target/debug/deps/libserde-a84dc545b5203d93.rmeta: /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/anilchowdary/Downloads/Smart_Grip-main/backend/target/debug/build/serde-496277053e86700a/out/private.rs
+
+/Users/anilchowdary/Downloads/Smart_Grip-main/backend/target/debug/deps/libserde-a84dc545b5203d93.rlib: /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/anilchowdary/Downloads/Smart_Grip-main/backend/target/debug/build/serde-496277053e86700a/out/private.rs
+
+/Users/anilchowdary/Downloads/Smart_Grip-main/backend/target/debug/deps/serde-a84dc545b5203d93.d: /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/anilchowdary/Downloads/Smart_Grip-main/backend/target/debug/build/serde-496277053e86700a/out/private.rs
+
+/Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/Users/anilchowdary/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/Users/anilchowdary/Downloads/Smart_Grip-main/backend/target/debug/build/serde-496277053e86700a/out/private.rs:
+
+# env-dep:OUT_DIR=/Users/anilchowdary/Downloads/Smart_Grip-main/backend/target/debug/build/serde-496277053e86700a/out
