@@ -238,6 +238,22 @@ def _run_pipeline(job_id: str, patient_id: str, storage_base: str) -> dict:
         fused.overall_confidence,
     )
 
+    required_measurements = (
+        "palm_width_mm",
+        "palm_length_mm",
+        "index_length_mm",
+        "middle_length_mm",
+    )
+    missing_measurements = [
+        key for key in required_measurements if getattr(fused, key, 0.0) <= 0.0
+    ]
+    if missing_measurements:
+        raise ValueError(
+            "Insufficient valid scan data for: "
+            + ", ".join(missing_measurements)
+            + ". Retake the rejected frames with the hand fully visible and in focus."
+        )
+
     # ── 8. AI calibration ────────────────────────────────────────────────────
     calibrated = _ai_calibrator.calibrate(fused)
 
@@ -298,6 +314,7 @@ async def _pipeline_task(job_id: str, patient_id: str, storage_base: str):
                 "result": None,
                 "error": str(exc),
             }
+        await _notify_rust_backend_error(job_id, str(exc))
 
 
 async def _notify_rust_backend(job_id: str, result: dict):
@@ -314,6 +331,22 @@ async def _notify_rust_backend(job_id: str, result: dict):
                 logger.warning("Rust backend notification returned %d", resp.status_code)
     except Exception as exc:
         logger.warning("Could not notify Rust backend for job %s: %s", job_id, exc)
+
+
+async def _notify_rust_backend_error(job_id: str, error_message: str):
+    """Persist a failed CV job so API clients do not poll forever."""
+    import httpx
+    url = f"{RUST_BACKEND_URL}/api/v1/tailor/cv_error"
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post(url, json={
+                "job_id": job_id,
+                "error_message": error_message,
+            })
+            if resp.status_code not in (200, 201, 204):
+                logger.warning("Rust backend failure notification returned %d", resp.status_code)
+    except Exception as exc:
+        logger.warning("Could not notify Rust backend of failed job %s: %s", job_id, exc)
 
 
 # ── API Endpoints ─────────────────────────────────────────────────────────────

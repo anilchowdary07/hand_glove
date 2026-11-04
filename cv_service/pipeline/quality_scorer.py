@@ -18,7 +18,7 @@ class FrameQuality:
 
 
 # Minimum thresholds to pass quality gate
-_MIN_BLUR = 0.30
+_MIN_BLUR = 0.04
 _MIN_LIGHTING = 0.25
 _MIN_VISIBILITY = 0.04          # ≥4% of frame pixels must be skin-like
 

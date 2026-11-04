@@ -2,11 +2,9 @@ import { Tabs } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import { useAppTheme } from "../../lib/theme";
-import { useAppStore } from "../../store/useAppStore";
 
 export default function TabsLayout() {
   const colors = useAppTheme();
-  const gloveDelivered = useAppStore((state) => state.glove_delivered);
 
   return (
     <Tabs
@@ -32,7 +30,7 @@ export default function TabsLayout() {
             home: "home",
             gestures: "gesture",
             devices: "precision-manufacturing",
-            sos: "emergency",
+            notifications: "notifications",
             profile: "person"
           };
           const iconName = nameByRoute[route.name] ?? "circle";
@@ -47,24 +45,21 @@ export default function TabsLayout() {
         }} 
       />
       <Tabs.Screen 
-        name="gestures" 
-        options={{ 
-          title: "Gestures",
-          href: gloveDelivered ? undefined : null
-        }} 
-      />
-      <Tabs.Screen 
         name="devices" 
         options={{ 
-          title: "Devices",
-          href: gloveDelivered ? undefined : null
+          title: "Devices"
         }} 
       />
       <Tabs.Screen 
-        name="sos" 
+        name="gestures" 
         options={{ 
-          title: "SOS",
-          href: gloveDelivered ? undefined : null
+          title: "Gestures"
+        }} 
+      />
+      <Tabs.Screen 
+        name="notifications" 
+        options={{ 
+          title: "Notifications"
         }} 
       />
       <Tabs.Screen 

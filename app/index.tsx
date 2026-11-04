@@ -5,10 +5,13 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withSeq
 import { MaterialIcons } from "@expo/vector-icons";
 
 import { useAppTheme } from "../lib/theme";
+import { useAppStore } from "../store/useAppStore";
 
 export default function SplashRoute() {
   const router = useRouter();
   const colors = useAppTheme();
+  const authenticated = useAppStore((state) => state.authenticated);
+  const introCompleted = useAppStore((state) => state.intro_completed);
   const glow = useSharedValue(0);
 
   useEffect(() => {
@@ -19,11 +22,15 @@ export default function SplashRoute() {
     );
 
     const timer = setTimeout(() => {
-      router.replace("/login");
+      if (authenticated) {
+        router.replace("/home");
+        return;
+      }
+      router.replace(introCompleted ? "/login" : "/onboarding/intro");
     }, 1900);
 
     return () => clearTimeout(timer);
-  }, [glow, router]);
+  }, [authenticated, glow, introCompleted, router]);
 
   const glowStyle = useAnimatedStyle(() => ({
     opacity: 0.4 + glow.value * 0.35,

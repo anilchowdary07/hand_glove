@@ -12,6 +12,8 @@ export type FabricationStatus =
 
 export type GloveConnectionState = "Disconnected" | "Searching" | "Pairing" | "Connected" | "Failed";
 
+export type AppPhase = "PRE_PURCHASE" | "PRE_ACTIVATION" | "ACTIVE_DEVICE";
+
 export type PatientDetails = {
   fullName: string;
   age: string;
@@ -65,6 +67,8 @@ type AppStore = {
   patient_id: string;
   authenticated: boolean;
   role: "patient" | "admin";
+  intro_completed: boolean;
+  app_phase: AppPhase;
   onboarding_completed: boolean;
   scan_completed: boolean;
   fabrication_status: FabricationStatus;
@@ -101,6 +105,8 @@ type AppStore = {
 
   setAuthenticated: (value: boolean) => void;
   setRole: (role: "patient" | "admin") => void;
+  setIntroCompleted: (value: boolean) => void;
+  setAppPhase: (phase: AppPhase) => void;
   setOnboardingCompleted: (value: boolean) => void;
   setScanCompleted: (value: boolean) => void;
   setFabricationStatus: (status: FabricationStatus) => void;
@@ -155,6 +161,8 @@ const createAppStore: StateCreator<AppStore> = (set) => ({
   patient_id: "",
   authenticated: false,
   role: "patient",
+  intro_completed: false,
+  app_phase: "PRE_PURCHASE",
   onboarding_completed: false,
   scan_completed: false,
   fabrication_status: "Pending Scan",
@@ -191,19 +199,40 @@ const createAppStore: StateCreator<AppStore> = (set) => ({
 
   setAuthenticated: (value) => set({ authenticated: value }),
   setRole: (role) => set({ role }),
+  setIntroCompleted: (value) => set({ intro_completed: value }),
+  setAppPhase: (phase) => set({ app_phase: phase }),
   setOnboardingCompleted: (value) => set({ onboarding_completed: value }),
-  setScanCompleted: (value) => set({ scan_completed: value }),
-  setFabricationStatus: (fabrication_status) => {
-    const glove_delivered = fabrication_status === "Delivered" || fabrication_status === "Connected";
-    const glove_connected = fabrication_status === "Connected";
-    set({ 
-      fabrication_status, 
-      glove_delivered, 
-      glove_connected 
-    });
-  },
-  setGloveDelivered: (value) => set({ glove_delivered: value }),
-  setGloveConnected: (value) => set({ glove_connected: value }),
+  setScanCompleted: (value) =>
+    set((state) => ({
+      scan_completed: value,
+      app_phase: value || state.fabrication_status !== "Pending Scan" ? "PRE_ACTIVATION" : "PRE_PURCHASE"
+    })),
+  setFabricationStatus: (fabrication_status) =>
+    set((state) => {
+      const glove_delivered = fabrication_status === "Delivered" || fabrication_status === "Connected";
+      const glove_connected = fabrication_status === "Connected";
+      const app_phase = glove_connected
+        ? "ACTIVE_DEVICE"
+        : state.scan_completed || fabrication_status !== "Pending Scan"
+          ? "PRE_ACTIVATION"
+          : "PRE_PURCHASE";
+      return {
+        fabrication_status,
+        glove_delivered,
+        glove_connected,
+        app_phase
+      };
+    }),
+  setGloveDelivered: (value) =>
+    set((state) => ({
+      glove_delivered: value,
+      app_phase: value || state.scan_completed ? "PRE_ACTIVATION" : state.app_phase
+    })),
+  setGloveConnected: (value) =>
+    set((state) => ({
+      glove_connected: value,
+      app_phase: value ? "ACTIVE_DEVICE" : state.app_phase
+    })),
   setGestureTrainingCompleted: (value) => set({ gesture_training_completed: value }),
 
   setMedicalCondition: (condition) => set({ medical_condition: condition }),
@@ -246,6 +275,7 @@ const createAppStore: StateCreator<AppStore> = (set) => ({
     glove_delivered: false,
     glove_connected: false,
     gesture_training_completed: false,
+    app_phase: "PRE_PURCHASE",
     medical_condition: "",
     glove_hand: "",
     patient_details: null,

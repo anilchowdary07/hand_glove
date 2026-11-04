@@ -28,25 +28,11 @@ export default function GloveConnectScreen() {
     
     if (gloveState === "Searching") {
       interval = setInterval(() => {
-        setConnectingProgress((prev) => {
-          if (prev >= 40) {
-            setGloveConnectionState("Pairing");
-            return 50;
-          }
-          return prev + 10;
-        });
+        setConnectingProgress((prev) => Math.min(prev + 10, 50));
       }, 500);
     } else if (gloveState === "Pairing") {
       interval = setInterval(() => {
-        setConnectingProgress((prev) => {
-          if (prev >= 90) {
-            setGloveConnectionState("Connected");
-            setFabricationStatus("Connected");
-            clearInterval(interval);
-            return 100;
-          }
-          return prev + 10;
-        });
+        setConnectingProgress((prev) => Math.min(prev + 10, 100));
       }, 500);
     }
 
@@ -54,6 +40,19 @@ export default function GloveConnectScreen() {
       if (interval) clearInterval(interval);
     };
   }, [gloveState]);
+
+  useEffect(() => {
+    if (gloveState === "Searching" && connectingProgress >= 40) {
+      setGloveConnectionState("Pairing");
+      setConnectingProgress(50);
+    }
+
+    if (gloveState === "Pairing" && connectingProgress >= 90) {
+      setGloveConnectionState("Connected");
+      setFabricationStatus("Connected");
+      setConnectingProgress(100);
+    }
+  }, [connectingProgress, gloveState, setFabricationStatus, setGloveConnectionState]);
 
   useEffect(() => {
     if (gloveState === "Connected") {

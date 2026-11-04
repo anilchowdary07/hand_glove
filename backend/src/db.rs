@@ -87,6 +87,12 @@ pub struct CvResultPayload {
     pub result: serde_json::Value,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct CvErrorPayload {
+    pub job_id: Uuid,
+    pub error_message: String,
+}
+
 // ── Database initialisation ──────────────────────────────────────────────────
 
 pub async fn init_db(pool: &PgPool) -> Result<(), sqlx::Error> {

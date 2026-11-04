@@ -3,7 +3,7 @@ use axum::{
     routing::{get, post, put},
     Json, Router,
 };
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tower_http::cors::CorsLayer;
 use sqlx::postgres::PgPoolOptions;
 use std::fs;
@@ -21,12 +21,6 @@ struct AppState {
 }
 
 // ── Response types ────────────────────────────────────────────────────────────
-#[derive(Serialize)]
-struct HealthResponse {
-    status: &'static str,
-    service: &'static str,
-}
-
 #[derive(Serialize)]
 struct UploadResponse {
     status: &'static str,
@@ -167,6 +161,25 @@ async fn ingest_cv_result(
     }
 }
 
+async fn ingest_cv_error(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<db::CvErrorPayload>,
+) -> Result<Json<serde_json::Value>, axum::http::StatusCode> {
+    db::update_scan_status(
+        &state.pool,
+        payload.job_id,
+        "failed",
+        Some(&payload.error_message),
+    )
+    .await
+    .map_err(|error| {
+        eprintln!("Error persisting CV failure: {:?}", error);
+        axum::http::StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    Ok(Json(serde_json::json!({ "status": "failed" })))
+}
+
 // ── Polling: scan status ──────────────────────────────────────────────────────
 async fn get_scan_status(
     State(state): State<Arc<AppState>>,
@@ -288,46 +301,46 @@ async fn main() {
     let pool = PgPoolOptions::new()
         .max_connections(10)
         .connect(&database_url)
-        .await;
+        .await
+        .unwrap_or_else(|error| {
+            panic!(
+                "Failed to connect to PostgreSQL at {}: {}",
+                database_url, error
+            )
+        });
 
     let http_client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(10))
         .build()
         .expect("Failed to build HTTP client");
 
-    let shared_state = if let Ok(pool) = pool {
-        println!("Connected to PostgreSQL");
-        db::init_db(&pool).await.expect("Failed to initialize database schema");
-        Some(Arc::new(AppState {
-            pool,
-            http_client,
-            cv_service_url,
-        }))
-    } else {
-        println!("WARNING: Failed to connect to PostgreSQL. Stateful endpoints will fail.");
-        None
-    };
+    println!("Connected to PostgreSQL");
+    db::init_db(&pool).await.expect("Failed to initialize database schema");
+    let shared_state = Arc::new(AppState {
+        pool,
+        http_client,
+        cv_service_url,
+    });
 
     let mut app = Router::new()
         .route("/health", get(health));
 
-    if let Some(state) = shared_state {
-        let api = Router::new()
-            // Upload (triggers CV pipeline)
-            .route("/api/v1/tailor/upload", post(upload_scan))
-            // CV service callback
-            .route("/api/v1/tailor/cv_result", post(ingest_cv_result))
-            // Polling endpoints
-            .route("/api/v1/tailor/status/:job_id", get(get_scan_status))
-            .route("/api/v1/tailor/results/:job_id", get(get_scan_results))
-            // Legacy
-            .route("/api/v1/tailor/dimensions", post(ingest_dimensions))
-            .route("/api/v1/patients", get(get_patients))
-            .route("/api/v1/patient/:id/status", put(update_patient_status))
-            .with_state(state);
+    let api = Router::new()
+        // Upload (triggers CV pipeline)
+        .route("/api/v1/tailor/upload", post(upload_scan))
+        // CV service callback
+        .route("/api/v1/tailor/cv_result", post(ingest_cv_result))
+            .route("/api/v1/tailor/cv_error", post(ingest_cv_error))
+        // Polling endpoints
+        .route("/api/v1/tailor/status/:job_id", get(get_scan_status))
+        .route("/api/v1/tailor/results/:job_id", get(get_scan_results))
+        // Legacy
+        .route("/api/v1/tailor/dimensions", post(ingest_dimensions))
+        .route("/api/v1/patients", get(get_patients))
+        .route("/api/v1/patient/:id/status", put(update_patient_status))
+        .with_state(shared_state);
 
-        app = app.merge(api);
-    }
+    app = app.merge(api);
 
     let app = app
         .layer(DefaultBodyLimit::max(100 * 1024 * 1024))

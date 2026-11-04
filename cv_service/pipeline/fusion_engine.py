@@ -94,7 +94,7 @@ _DEFAULT_VIEW_WEIGHT = 0.5
 # Plausible physiological ranges in mm (adult hands)
 PLAUSIBLE_RANGES = {
     "palm_width_mm":   (55.0, 110.0),
-    "palm_length_mm":  (85.0, 130.0),
+    "palm_length_mm":  (70.0, 130.0),
     "thumb_length_mm": (40.0, 75.0),
     "index_length_mm": (55.0, 100.0),
     "middle_length_mm":(60.0, 105.0),

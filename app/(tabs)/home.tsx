@@ -18,7 +18,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const colors = useAppTheme();
 
-  const authenticated = useAppStore((state) => state.authenticated);
+  const appPhase = useAppStore((state) => state.app_phase);
   const scanCompleted = useAppStore((state) => state.scan_completed);
   const gloveDelivered = useAppStore((state) => state.glove_delivered);
   const gloveConnected = useAppStore((state) => state.glove_connected);
@@ -26,6 +26,8 @@ export default function HomeScreen() {
   const gloveHand = useAppStore((state) => state.glove_hand);
   const medicalCondition = useAppStore((state) => state.medical_condition);
   const patientDetails = useAppStore((state) => state.patient_details);
+  const setAppPhase = useAppStore((state) => state.setAppPhase);
+  const setFabricationStatus = useAppStore((state) => state.setFabricationStatus);
 
   const devices = useAppStore((state) => state.devices);
   const toggleDevicePower = useAppStore((state) => state.toggleDevicePower);
@@ -33,8 +35,79 @@ export default function HomeScreen() {
   const gestures = useAppStore((state) => state.gestures);
   const sosEvents = useAppStore((state) => state.sos_events);
 
-  // 1. STATE: Before Scan Complete
-  if (!scanCompleted) {
+  // 1. STATE: Pre-purchase landing
+  if (appPhase === "PRE_PURCHASE") {
+    return (
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }} className="flex-1 px-5 pt-12">
+        <SectionTitle
+          colors={colors}
+          title="Welcome to Smart Grip"
+          subtitle="Order a new glove or connect an existing device in minutes."
+        />
+
+        <GlassCard colors={colors} className="mt-6 gap-4 p-6">
+          <View className="flex-row items-center gap-3">
+            <View style={{ backgroundColor: colors.primarySoft }} className="h-12 w-12 items-center justify-center rounded-2xl">
+              <MaterialIcons name="back-hand" size={24} color={colors.primary} />
+            </View>
+            <View className="flex-1">
+              <Text style={{ color: colors.text }} className="font-display text-[18px] font-bold">
+                Smart glove ecosystem
+              </Text>
+              <Text style={{ color: colors.secondaryText }} className="font-body text-[14px] leading-5">
+                Guided scanning, personalized calibration, and emergency protection.
+              </Text>
+            </View>
+          </View>
+
+          <View className="gap-3">
+            <PrimaryButton
+              colors={colors}
+              title="Order Smart Glove"
+              icon="shopping-cart"
+              onPress={() => {
+                setAppPhase("PRE_ACTIVATION");
+                router.push("/scans/intro");
+              }}
+            />
+            <PrimaryButton
+              colors={colors}
+              title="Connect Existing Glove"
+              icon="bluetooth"
+              onPress={() => {
+                setFabricationStatus("Delivered");
+                router.push("/glove/connect");
+              }}
+            />
+          </View>
+        </GlassCard>
+
+        <GlassCard colors={colors} className="mt-6 gap-3 p-5">
+          <Text style={{ color: colors.text }} className="font-display text-[18px] font-bold">
+            What you get
+          </Text>
+          {[
+            "Precision measurement pipeline",
+            "Gesture-to-action automation",
+            "Emergency SOS access",
+            "Accessibility-first controls",
+          ].map((item) => (
+            <View key={item} className="flex-row items-center gap-3">
+              <View style={{ backgroundColor: colors.successSoft }} className="h-8 w-8 items-center justify-center rounded-full">
+                <MaterialIcons name="check" size={16} color={colors.success} />
+              </View>
+              <Text style={{ color: colors.text }} className="font-body text-[14px]">
+                {item}
+              </Text>
+            </View>
+          ))}
+        </GlassCard>
+      </ScrollView>
+    );
+  }
+
+  // 2. STATE: Before Scan Complete
+  if (appPhase === "PRE_ACTIVATION" && !scanCompleted) {
     return (
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }} className="flex-1 px-5 pt-12">
         <SectionTitle colors={colors} title="System Onboarding" subtitle="Complete the final setup steps to request your medical device." />
@@ -61,7 +134,7 @@ export default function HomeScreen() {
     );
   }
 
-  // 2. STATE: Scan completed but glove not delivered yet (Fabrication Tracking Screen)
+  // 3. STATE: Scan completed but glove not delivered yet (Fabrication Tracking Screen)
   if (scanCompleted && !gloveDelivered) {
     // Determine active index in timeline based on fabrication_status
     let activeTimelineIdx = 0;
@@ -152,6 +225,15 @@ export default function HomeScreen() {
           })}
         </View>
 
+        <View className="mt-6">
+          <PrimaryButton
+            colors={colors}
+            title="Track Order"
+            icon="local-shipping"
+            onPress={() => router.push("/orders/tracking")}
+          />
+        </View>
+
         {/* Demo Helper to bypass Fabrication queue via Admin switch */}
         <GlassCard colors={colors} className="mt-6 p-4 border border-dashed border-sky-400/30 gap-3">
           <Text style={{ color: colors.text }} className="font-display text-[15px] font-semibold text-center">
@@ -165,7 +247,7 @@ export default function HomeScreen() {
     );
   }
 
-  // 3. STATE: Glove Delivered but not Connected (Pairing Prompt)
+  // 4. STATE: Glove Delivered but not Connected (Pairing Prompt)
   if (gloveDelivered && !gloveConnected) {
     return (
       <View style={{ backgroundColor: colors.background }} className="flex-1 justify-center px-5">
@@ -192,7 +274,7 @@ export default function HomeScreen() {
     );
   }
 
-  // 4. STATE: Full Glove Connected Dashboard
+  // 5. STATE: Full Glove Connected Dashboard
   const handIcon = gloveHand === "left" ? "Left Hand" : "Right Hand";
   const gloveHandImage = gloveHand === "left" 
     ? "https://lh3.googleusercontent.com/aida-public/AB6AXuC-8erfF2cjZ0s7pNddR6kZtZv8JwMM6auXcWRZXTzXOWbfnHb4Rld_8aPjxAx8HklRcMVkM_uO161MH1BTtaFchwqn21SYRVyMYQ2jqlJuyr_1CC-4MhpPxzZyQWqikHGoA_TktHHQrPi6Wngt7wxgqsjGQaP4z5Ttr3qj1fR26WSKfkRTC7UIDhYNRvHpKQ6hrxvjEdi-9juJzKNY7b89fXZujke8RgGYxIyH3I_VRYKikS5WtATayrCYAXxXtRXT1cbiG9E4HQ8"

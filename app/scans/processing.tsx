@@ -280,7 +280,7 @@ export default function MeasurementProcessingScreen() {
     } finally {
       setIsSaving(false);
       useAppStore.getState().setScanCompleted(true);
-      router.replace("/home");
+      router.replace("/orders/config");
     }
   };
 

@@ -64,6 +64,7 @@ export default function RootLayout() {
               <Stack.Screen name="register" />
               <Stack.Screen name="forgot-password" />
               <Stack.Screen name="settings" />
+              <Stack.Screen name="onboarding/intro" />
               <Stack.Screen name="onboarding/condition" />
               <Stack.Screen name="onboarding/hand" />
               <Stack.Screen name="onboarding/details" />
@@ -71,6 +72,12 @@ export default function RootLayout() {
               <Stack.Screen name="scans/camera" />
               <Stack.Screen name="scans/review" />
               <Stack.Screen name="scans/upload" />
+              <Stack.Screen name="orders/config" />
+              <Stack.Screen name="orders/delivery" />
+              <Stack.Screen name="orders/payment" />
+              <Stack.Screen name="orders/summary" />
+              <Stack.Screen name="orders/success" />
+              <Stack.Screen name="orders/tracking" />
               <Stack.Screen name="glove/connect" />
               <Stack.Screen name="admin/index" />
               <Stack.Screen name="(tabs)" />

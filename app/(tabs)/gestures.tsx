@@ -5,7 +5,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 import { useAppTheme } from "../../lib/theme";
 import { useAppStore, type Gesture, type ActionMapping } from "../../store/useAppStore";
-import { GlassCard, PrimaryButton, ProgressRing, SecondaryButton } from "../../components/ui";
+import { GlassCard, PrimaryButton, ProgressRing, SecondaryButton, StatusBadge } from "../../components/ui";
 
 export default function GesturesScreen() {
   const router = useRouter();
