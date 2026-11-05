@@ -48,13 +48,13 @@ class DepthEstimator:
     def __init__(self):
         logger.info("Loading MiDaS model (%s) on %s …", _MIDAS_MODEL_TYPE, _DEVICE)
         self._model = torch.hub.load(
-            "intel-isl/MiDaS",
+            "intel-isl/MiDaS:master",
             _MIDAS_MODEL_TYPE,
             trust_repo=True,
         ).to(_DEVICE).eval()
 
         transforms = torch.hub.load(
-            "intel-isl/MiDaS",
+            "intel-isl/MiDaS:master",
             "transforms",
             trust_repo=True,
         )

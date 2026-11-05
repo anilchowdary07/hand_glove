@@ -66,27 +66,26 @@ DB_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@local
 RUST_BACKEND_URL = os.getenv("RUST_BACKEND_URL", "http://localhost:3000")
 
 
-def _resolve_storage_base(storage_base: str) -> Path:
-    """Resolve the scan storage directory across common repo layouts."""
+def _resolve_job_dir(storage_base: str, job_id: str) -> Path:
+    """Resolve the specific job directory across common repo layouts."""
     raw_path = Path(storage_base)
-    if raw_path.is_absolute() and raw_path.exists():
-        return raw_path
-
     service_dir = Path(__file__).resolve().parent
     repo_root = service_dir.parent
 
     candidates = [
-        raw_path,
-        service_dir / raw_path,
-        repo_root / raw_path,
-        repo_root / "backend" / raw_path,
+        raw_path / job_id,
+        repo_root / "backend" / "storage" / job_id,
+        repo_root / "storage" / job_id,
+        service_dir / "storage" / job_id,
+        service_dir / raw_path / job_id,
+        repo_root / raw_path / job_id,
     ]
 
     for candidate in candidates:
         if candidate.exists():
             return candidate
 
-    return candidates[0]
+    return repo_root / "backend" / "storage" / job_id
 
 
 @asynccontextmanager
@@ -137,7 +136,7 @@ def _run_pipeline(job_id: str, patient_id: str, storage_base: str) -> dict:
     Synchronous pipeline — runs in a thread pool via asyncio.to_thread.
     Returns the final measurement dict.
     """
-    job_dir = _resolve_storage_base(storage_base) / job_id
+    job_dir = _resolve_job_dir(storage_base, job_id)
     if not job_dir.exists():
         raise FileNotFoundError(f"Job directory not found: {job_dir}")
 
