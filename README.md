@@ -17,8 +17,79 @@
 
 ---
 
+## ⚡ How to Run the Application (macOS Quick Start)
+
+Run each component in a **separate terminal tab** from the project root (`/Users/anilchowdary/Documents/smart_glove`):
+
+### 0️⃣ Step 0: Find Your Local Wi-Fi IP & Configure `.env`
+Your phone running Expo Go communicates with your Mac backend over your local Wi-Fi. Find your Mac's IP address:
+```bash
+ipconfig getifaddr en0
+```
+Then update your `.env` file with that IP (or run this command directly):
+```bash
+echo "EXPO_PUBLIC_API_URL=http://$(ipconfig getifaddr en0):3000" > .env
+echo "EXPO_PUBLIC_FIREBASE_RTDB_URL=https://smartgrip-e5e0a-default-rtdb.firebaseio.com" >> .env
+```
+
+---
+
+### 1️⃣ Terminal 1: PostgreSQL Database (Port 5433)
+```bash
+# Start PostgreSQL:
+/Library/PostgreSQL/17/bin/pg_ctl -D /Users/anilchowdary/pg_smartgrip -o "-p 5433" -l /Users/anilchowdary/pg_smartgrip/server.log start
+
+# Check status:
+/Library/PostgreSQL/17/bin/pg_ctl -D /Users/anilchowdary/pg_smartgrip status
+
+# Stop PostgreSQL:
+/Library/PostgreSQL/17/bin/pg_ctl -D /Users/anilchowdary/pg_smartgrip stop
+```
+
+---
+
+### 2️⃣ Terminal 2: Rust Backend (Port 3000)
+```bash
+cd backend
+DATABASE_URL="postgres://postgres@localhost:5433/smartgrip" CV_SERVICE_URL="http://localhost:8001" cargo run
+```
+
+---
+
+### 3️⃣ Terminal 3: Computer Vision Microservice (Port 8001)
+```bash
+cd cv_service
+DATABASE_URL="postgresql+asyncpg://postgres@localhost:5433/smartgrip" ./venv/bin/uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+```
+
+---
+
+### 4️⃣ Terminal 4: Expo Mobile Frontend (Port 8081)
+```bash
+npx expo start --clear
+```
+- Open **Expo Go** on your phone (ensure your phone is connected to the same Wi-Fi).
+- Scan the displayed QR code or enter: `exp://<YOUR_IP>:8081` (where `<YOUR_IP>` is what `ipconfig getifaddr en0` printed).
+
+---
+
+### 🔍 Verification & Health Checks
+```bash
+# Verify Rust Backend:
+curl http://localhost:3000/health
+
+# Verify CV Microservice:
+curl http://localhost:8001/health
+
+# Verify all listening ports (3000, 5433, 8001, 8081):
+lsof -i :3000,5433,8001,8081
+```
+
+---
+
 ## 📑 Table of Contents
 
+- [How to Run the Application](#-how-to-run-the-application-macos-quick-start)
 - [Overview & Clinical Motivation](#-overview--clinical-motivation)
 - [System Architecture](#-system-architecture)
 - [End-to-End System Workflow](#-end-to-end-system-workflow)

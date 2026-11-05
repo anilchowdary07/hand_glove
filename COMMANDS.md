@@ -4,6 +4,19 @@ Run each service in a separate terminal tab from the project root (`/Users/anilc
 
 ---
 
+### Step 0: Find Your Local Wi-Fi IP Address
+Run this to see your Mac's current Wi-Fi IP address:
+```bash
+ipconfig getifaddr en0
+```
+Update your `.env` so your mobile device can reach the backend:
+```bash
+echo "EXPO_PUBLIC_API_URL=http://$(ipconfig getifaddr en0):3000" > .env
+echo "EXPO_PUBLIC_FIREBASE_RTDB_URL=https://smartgrip-e5e0a-default-rtdb.firebaseio.com" >> .env
+```
+
+---
+
 ### Terminal 1: PostgreSQL Database (Port 5433)
 ```bash
 # Start PostgreSQL cluster:
@@ -11,6 +24,9 @@ Run each service in a separate terminal tab from the project root (`/Users/anilc
 
 # Check status:
 /Library/PostgreSQL/17/bin/pg_ctl -D /Users/anilchowdary/pg_smartgrip status
+
+# Restart PostgreSQL:
+/Library/PostgreSQL/17/bin/pg_ctl -D /Users/anilchowdary/pg_smartgrip -o "-p 5433" restart
 
 # Stop PostgreSQL:
 /Library/PostgreSQL/17/bin/pg_ctl -D /Users/anilchowdary/pg_smartgrip stop
