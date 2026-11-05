@@ -28,12 +28,12 @@ import { RouteGuard } from "../components/RouteGuard";
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout() {
-  const [manropeLoaded] = useManropeFonts({
+  const [manropeLoaded, manropeError] = useManropeFonts({
     Manrope_400Regular,
     Manrope_600SemiBold,
     Manrope_700Bold
   });
-  const [atkinsonLoaded] = useAtkinsonFonts({
+  const [atkinsonLoaded, atkinsonError] = useAtkinsonFonts({
     AtkinsonHyperlegibleNext_400Regular,
     AtkinsonHyperlegibleNext_500Medium,
     AtkinsonHyperlegibleNext_600SemiBold,
@@ -41,14 +41,14 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (manropeLoaded && atkinsonLoaded) {
+    if ((manropeLoaded || manropeError) && (atkinsonLoaded || atkinsonError)) {
       void SplashScreen.hideAsync();
     }
-  }, [atkinsonLoaded, manropeLoaded]);
+  }, [atkinsonLoaded, atkinsonError, manropeLoaded, manropeError]);
 
   const colors = useAppTheme();
 
-  if (!manropeLoaded || !atkinsonLoaded) {
+  if (!manropeLoaded && !manropeError) {
     return null;
   }
 
