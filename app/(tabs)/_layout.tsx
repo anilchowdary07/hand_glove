@@ -34,7 +34,7 @@ export default function TabsLayout() {
             profile: "person"
           };
           const iconName = nameByRoute[route.name] ?? "circle";
-          return <MaterialIcons name={iconName} size={focused ? size + 2 : size} color={color} />;
+          return <MaterialIcons name={iconName as any} size={focused ? size + 2 : size} color={color as any} />;
         }
       })}
     >

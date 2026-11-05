@@ -20,7 +20,7 @@ export function RouteGuard({ children }: RouteGuardProps) {
 
   useEffect(() => {
     // 1. Skip routing guard if index (splash) page
-    if (segments.length === 0 || pathname === "/") {
+    if ((segments.length as number) === 0 || pathname === "/") {
       return;
     }
 

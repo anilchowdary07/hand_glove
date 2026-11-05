@@ -24,6 +24,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { queryClient } from "../lib/queryClient";
 import { useAppTheme } from "../lib/theme";
 import { RouteGuard } from "../components/RouteGuard";
+import { useFirebaseSync } from "../lib/firebaseSync";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -47,6 +48,7 @@ export default function RootLayout() {
   }, [atkinsonLoaded, atkinsonError, manropeLoaded, manropeError]);
 
   const colors = useAppTheme();
+  useFirebaseSync();
 
   if (!manropeLoaded && !manropeError) {
     return null;

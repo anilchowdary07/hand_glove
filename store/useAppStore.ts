@@ -1,5 +1,8 @@
 import { create, type StateCreator } from "zustand";
 import type { ThemeMode } from "../lib/theme";
+import { pushApplianceStateToFirebase } from "../lib/firebaseSync";
+
+export type FirebaseSyncStatus = "idle" | "connected" | "syncing" | "error";
 
 export type FabricationStatus = 
   | "Pending Scan"
@@ -96,6 +99,13 @@ type AppStore = {
   glove_battery: number;
   glove_signal: string;
 
+  // Firebase Realtime Database Sync
+  firebase_sync_status: FirebaseSyncStatus;
+  last_firebase_sync: string | null;
+  setFirebaseSyncStatus: (status: FirebaseSyncStatus) => void;
+  syncFromFirebaseAppliances: (appliances: Record<string, string>) => void;
+  setDevicePower: (deviceId: string, active: boolean) => void;
+
   // Setters & Actions
   setThemeMode: (mode: ThemeMode) => void;
   toggleHighContrast: () => void;
@@ -138,9 +148,10 @@ const defaultGestures: Gesture[] = [
 ];
 
 const defaultDevices: SmartDevice[] = [
-  { id: "light", name: "Living room lights", type: "Smart light", status: "Connected", active: true, intensity: 60 },
-  { id: "fan", name: "Bedroom fan", type: "Smart fan", status: "Idle", active: true, intensity: 35 },
-  { id: "tv", name: "Living room TV", type: "Television", status: "Connected", active: false, intensity: 0 },
+  { id: "light", name: "Living room lights", type: "Smart light", status: "Idle", active: false, intensity: 60 },
+  { id: "fan", name: "Bedroom fan", type: "Smart fan", status: "Idle", active: false, intensity: 35 },
+  { id: "tv", name: "Living room TV", type: "Television", status: "Idle", active: false, intensity: 0 },
+  { id: "ac", name: "Air Conditioner", type: "Air Conditioner", status: "Idle", active: false, intensity: 22 },
   { id: "speaker", name: "Voice speaker", type: "Bluetooth speaker", status: "Offline", active: false, intensity: 0 }
 ];
 
@@ -189,6 +200,10 @@ const createAppStore: StateCreator<AppStore> = (set) => ({
   glove_connection_state: "Disconnected",
   glove_battery: 82,
   glove_signal: "Strong",
+
+  // Firebase Realtime Database Sync
+  firebase_sync_status: "idle",
+  last_firebase_sync: null,
 
   // Setters & Actions
   setThemeMode: (mode) => set({ themeMode: mode }),
@@ -258,10 +273,57 @@ const createAppStore: StateCreator<AppStore> = (set) => ({
     set((state) => ({ 
       mappings: state.mappings.filter(m => !(m.gestureId === gestureId && m.deviceId === deviceId)) 
     })),
-  toggleDevicePower: (deviceId) =>
+  setFirebaseSyncStatus: (status) => set({ firebase_sync_status: status }),
+  syncFromFirebaseAppliances: (appliances) =>
+    set((state) => {
+      let hasChanges = false;
+      const updatedDevices = state.devices.map((d) => {
+        const remoteVal = appliances[d.id];
+        if (remoteVal !== undefined) {
+          const remoteActive = remoteVal.trim().toUpperCase() === "ON";
+          if (d.active !== remoteActive) {
+            hasChanges = true;
+            return {
+              ...d,
+              active: remoteActive,
+              status: remoteActive ? "Connected" : "Idle",
+            };
+          }
+        }
+        return d;
+      });
+
+      return {
+        ...(hasChanges ? { devices: updatedDevices } : {}),
+        firebase_sync_status: "connected",
+        last_firebase_sync: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+      };
+    }),
+  toggleDevicePower: (deviceId) => {
+    let nextActive = false;
+    set((state) => {
+      const target = state.devices.find((d) => d.id === deviceId);
+      nextActive = target ? !target.active : false;
+      return {
+        devices: state.devices.map((d) =>
+          d.id === deviceId
+            ? { ...d, active: nextActive, status: nextActive ? "Connected" : "Idle" }
+            : d
+        ),
+      };
+    });
+    void pushApplianceStateToFirebase(deviceId, nextActive);
+  },
+  setDevicePower: (deviceId, active) => {
     set((state) => ({
-      devices: state.devices.map(d => d.id === deviceId ? { ...d, active: !d.active, status: !d.active ? "Connected" : "Idle" } : d)
-    })),
+      devices: state.devices.map((d) =>
+        d.id === deviceId
+          ? { ...d, active, status: active ? "Connected" : "Idle" }
+          : d
+      ),
+    }));
+    void pushApplianceStateToFirebase(deviceId, active);
+  },
   setDeviceIntensity: (deviceId, val) =>
     set((state) => ({
       devices: state.devices.map(d => d.id === deviceId ? { ...d, intensity: val } : d)

@@ -56,7 +56,7 @@ export default function DeliveryScreen() {
     <SafeAreaView className={`flex-1 ${isDark ? "bg-slate-950" : "bg-slate-50"}`}>
       <View className="px-6 pt-6 pb-4 flex-row items-center justify-between">
         <TouchableOpacity 
-          onPress={() => router.replace("/(tabs)")}
+          onPress={() => router.replace("/(tabs)/home" as any)}
           className={`w-10 h-10 items-center justify-center rounded-full ${isDark ? "bg-slate-800" : "bg-white"} shadow-sm`}
           accessible={true}
           accessibilityRole="button"

@@ -4,7 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 import { useAppTheme } from "../../lib/theme";
 import { useAppStore, type SosEvent } from "../../store/useAppStore";
-import { ConfirmModal, GlassCard, SOSButton, SectionTitle, StatusBadge } from "../../components/ui";
+import { ConfirmModal, GlassCard, PrimaryButton, SOSButton, SectionTitle, StatusBadge } from "../../components/ui";
 
 const defaultEmergencyContacts = [
   { id: "1", name: "Dr. Patel", relation: "Physician", status: "Primary" },

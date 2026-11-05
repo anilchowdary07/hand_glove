@@ -369,15 +369,23 @@ export default function HomeScreen() {
 
       {/* Connected Smart Devices Section */}
       <View className="mt-6 gap-3">
-        <Text style={{ color: colors.text }} className="font-display text-[18px] font-bold">
-          Quick Device Actions
-        </Text>
+        <View className="flex-row items-center justify-between">
+          <Text style={{ color: colors.text }} className="font-display text-[18px] font-bold">
+            Quick Device Actions
+          </Text>
+          <View className="flex-row items-center gap-1.5 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+            <View className="w-2 h-2 rounded-full bg-emerald-500" />
+            <Text className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+              Firebase Live
+            </Text>
+          </View>
+        </View>
         {devices.map((dev) => (
           <GlassCard key={dev.id} colors={colors} className="flex-row items-center justify-between p-4">
             <View className="flex-row items-center gap-3">
               <View style={{ backgroundColor: dev.active ? colors.primarySoft : colors.elevated }} className="w-11 h-11 rounded-xl items-center justify-center">
                 <MaterialIcons 
-                  name={dev.type === "Smart light" ? "lightbulb-outline" : dev.type === "Smart fan" ? "toys" : "speaker"} 
+                  name={dev.type === "Smart light" ? "lightbulb-outline" : dev.type === "Smart fan" ? "toys" : dev.type === "Air Conditioner" ? "ac-unit" : dev.type === "Television" ? "tv" : "speaker"} 
                   size={22} 
                   color={dev.active ? colors.primary : colors.secondaryText} 
                 />
